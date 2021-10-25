@@ -10,9 +10,7 @@ import Foundation
 import ClosurePwn
 import JailbreakUtils
 
-class KeybagClosure: PwnClosure {
-    public var fastUntether = false
-    
+class KeybagClosure: PwnClosure {    
     override init(name: String = "Something") throws {
         try super.init(name: name)
         
@@ -72,39 +70,13 @@ class KeybagClosure: PwnClosure {
             env.reference
         ]).insertNow()
         
-        if fastUntether {
-            let homeStr = try pool.getStrRef("HOME")
-            let homePath = try pool.getStrRef("/var/db/diagnostics")
-            try callCFunc(name: "setenv", arguments: [
-                homeStr,
-                homePath,
-                .absolute(address: 1)
-            ]).insertNow()
-            
-            let origLogd = try pool.getStrRef("/usr/libexec/logd")
-            let argv_logd = try pool.makeMemoryObject(size: 16, data: [
-                .init(offset: 0, target: origLogd),
-                .init(offset: 8, target: .absolute(address: 0))
-            ])
-            
-            let realLogd = try pool.getStrRef("/usr/libexec/logd.back")
-            try callCFunc(name: "execv", arguments: [
-                realLogd,
-                argv_logd.reference
-            ]).insertNow()
-            
-            try callCFunc(name: "exit", arguments: [
-                .absolute(address: 99)
-            ]).insertNow()
-        } else {
-            try callCFunc(name: "wait", arguments: [
-                pidBuf
-            ]).insertNow()
-            
-            try callCFunc(name: "exit", arguments: [
-                .absolute(address: 99)
-            ]).insertNow()
-        }
+        try callCFunc(name: "wait", arguments: [
+            pidBuf
+        ]).insertNow()
+        
+        try callCFunc(name: "exit", arguments: [
+            .absolute(address: 99)
+        ]).insertNow()
         
         return try super.generatePayload()
     }
