@@ -11,12 +11,6 @@ import KernelExploit
 import externalCStuff
 import asmAndC
 
-// Note: I never tested the fast untether on a real device
-//       Enabling it may bootloop your device and force you to update it
-// !!!         I STRONGLY ADVISE AGAINST ENABLING THE FAST UNTETHER         !!!
-// !!! IF IT BREAKS YOUR DEVICE, I WILL TAKE *ABSOLUTELY NO RESPONSIBILITY* !!!
-let fastUntetherEnabled = false
-
 // AltStore builds should have this option set to true
 // This will cause a message to be shown after installing the untether
 let altStoreBuild       = false
@@ -267,10 +261,8 @@ if action == "untether" {
     if access("/", W_OK) == 0 {
         // Untether already ran, sleep forever
         // Try to replace service to prevent us from being launched again
-        if !fastUntetherEnabled {
-            run(prog: "/.Fugu14Untether/bin/launchctl", args: ["unload", "/System/Library/LaunchDaemons/com.apple.analyticsd.plist"])
-            run(prog: "/.Fugu14Untether/bin/launchctl", args: ["load",   "/Library/LaunchDaemons/com.apple.analyticsd.plist"])
-        }
+        run(prog: "/.Fugu14Untether/bin/launchctl", args: ["unload", "/System/Library/LaunchDaemons/com.apple.analyticsd.plist"])
+        run(prog: "/.Fugu14Untether/bin/launchctl", args: ["load",   "/Library/LaunchDaemons/com.apple.analyticsd.plist"])
         
         dispatchMain()
     }
@@ -301,10 +293,8 @@ case "untether":
     pe.unsafelyUnwrapped.injectTC(path: "/.Fugu14Untether/trustcache")
     
     // Now replace service
-    if !fastUntetherEnabled {
-        run(prog: "/.Fugu14Untether/bin/launchctl", args: ["unload", "/System/Library/LaunchDaemons/com.apple.analyticsd.plist"])
-        run(prog: "/.Fugu14Untether/bin/launchctl", args: ["load",   "/Library/LaunchDaemons/com.apple.analyticsd.plist"])
-    }
+    run(prog: "/.Fugu14Untether/bin/launchctl", args: ["unload", "/System/Library/LaunchDaemons/com.apple.analyticsd.plist"])
+    run(prog: "/.Fugu14Untether/bin/launchctl", args: ["load",   "/Library/LaunchDaemons/com.apple.analyticsd.plist"])
     
     // Attempt to mount, then launch jailbreak server
     if case .ok = pe.unsafelyUnwrapped.untether() {
